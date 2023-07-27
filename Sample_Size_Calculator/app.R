@@ -10,12 +10,12 @@ ui <- fluidPage(
     sidebarPanel(
       numericInput("population_size", "모집단 크기:", value = 100, min = 1, max = 10000000000),
       selectInput("confidence_level", "신뢰수준:", choices = c("90%", "95%", "99%")),
-      textInput("margin_of_error", "오차한계(%):", value = "5")
+      numericInput("margin_of_error", "오차한계(%):", value = 5, min = 1, max = 100)
     ),
     
     # 표본 크기를 출력하는 출력 요소를 정의합니다.
     mainPanel(
-      verbatimTextOutput("sample_size_output")
+      uiOutput("sample_size_output")
     )
   )
 )
@@ -28,9 +28,9 @@ finite_correction <- function(sample_size, population_size) {
 
 server <- function(input, output) {
   calculate_sample_size <- function(population_size, confidence_level, margin_of_error) {
-    z_scores <- c(1.645, 1.96, 2.576)  # Z-scores for 90%, 95%, 99% confidence levels
+    z_scores <- c(1.65, 1.96, 2.58)  # Z-scores for 90%, 95%, 99% confidence levels
     z_score <- z_scores[confidence_level == c("90%", "95%", "99%")]
-    margin_of_error <- as.numeric(margin_of_error) / 100  # Convert margin of error to a proportion
+    margin_of_error <- margin_of_error / 100  # Convert margin of error to a proportion
     
     # Calculate sample size
     n <- (z_score^2 * 0.5 * (1 - 0.5)) / (margin_of_error^2)
@@ -41,16 +41,15 @@ server <- function(input, output) {
     return(ceiling(n_corrected))  # Round up to nearest whole number
   }
   
-  output$sample_size_output <- renderPrint({
+  output$sample_size_output <- renderUI({
     population_size <- input$population_size
     confidence_level <- input$confidence_level
     margin_of_error <- input$margin_of_error
     
     sample_size <- calculate_sample_size(population_size, confidence_level, margin_of_error)
-    paste("The required sample size is", sample_size, "people.")
+    HTML(paste("필요한 최소 표본 크기는 <span style='font-size:150%; color:darkblue; font-weight:bold;'>", sample_size, "</span>명입니다."))
   })
 }
-
 
 # Shiny 앱을 실행합니다.
 shinyApp(ui, server)
