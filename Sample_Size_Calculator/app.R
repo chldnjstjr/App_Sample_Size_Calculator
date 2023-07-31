@@ -57,12 +57,12 @@ ui <- navbarPage("표본 크기 및 오차 한계 계산기",
                           mainPanel(
                             h3("오차 한계 계산 방법"),
                             p("오차 한계는 다음 공식을 사용하여 계산됩니다:"),
-                            p("E = Z * sqrt((p * (1 - p)) / n)"),
+                            p("E = z_score * sqrt(0.5 * (1 - 0.5)) / sqrt((N - 1) * n / (N - n))"),
                             p("여기서,"),
                             p("E는 계산된 오차 한계,"),
                             p("Z는 신뢰수준에 해당하는 Z 점수 (예: 90% 신뢰수준의 Z 점수는 1.645, 95%는 1.96, 99%는 2.576),"),
                             p("p는 모집단 비율 (일반적으로 0.5를 사용),"),
-                            p("n은 표본 크기입니다."),
+                            p("N과 n은 각각 모집단 크기와 표본 크기입니다."),
                             p("예: 모집단 크기가 10,000이고, 표본 크기가 1000명, 신뢰 수준이 99%일 때 오차 한계는 다음과 같이 계산됩니다:"),
                             p("E = 2.576 * sqrt((0.5 * 0.5) / 1000) = 0.0816"),
                             p("따라서 계산된 오차 한계는 ±8.16%입니다.")
@@ -100,8 +100,8 @@ server <- function(input, output) {
     z_score <- z_scores[confidence_level == c("90%", "95%", "99%")]
     
     # Calculate margin of error
-    E <- z_score * sqrt((0.5 * (1 - 0.5)) / sample_size)
-    
+    E <- z_score * sqrt(0.5 * (1 - 0.5)) / sqrt((population_size - 1) * sample_size / (population_size - sample_size))
+
     return(round(E * 100, 2))  # Return as a percentage, rounded to 2 decimal places
   }
   
@@ -111,7 +111,7 @@ server <- function(input, output) {
     margin_of_error <- input$margin_of_error_sample
     
     sample_size <- calculate_sample_size(population_size, confidence_level, margin_of_error)
-    HTML(paste("<div style='text-align: center;'>필요한 최소 표본 크기는 <span style='font-size:150%; color:darkblue; font-weight:bold;'>", sample_size, "</span>명입니다.</div>"))
+    HTML(paste("<div style='text-align: center;'>필요한 최소 표본 크기는 <span style='font-size:500%; color:darkblue; font-weight:bold;'>", sample_size, "</span>명입니다.</div>"))
   })
   
   output$margin_of_error_output <- renderUI({
@@ -120,7 +120,7 @@ server <- function(input, output) {
     sample_size <- input$sample_size_margin
     
     margin_of_error <- calculate_margin_of_error(population_size, confidence_level, sample_size)
-    HTML(paste("<div style='text-align: center;'>계산된 오차 한계는 <span style='font-size:150%; color:darkblue; font-weight:bold;'>±", margin_of_error, "%</span>입니다.</div>"))
+    HTML(paste("<div style='text-align: center;'>계산된 오차 한계는 <span style='font-size:500%; color:darkblue; font-weight:bold;'>±", margin_of_error, "%</span>입니다.</div>"))
   })
 }
 
