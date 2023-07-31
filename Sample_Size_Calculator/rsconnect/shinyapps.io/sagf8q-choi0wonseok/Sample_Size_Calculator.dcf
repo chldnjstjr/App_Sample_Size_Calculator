@@ -5,9 +5,9 @@ account: sagf8q-choi0wonseok
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 9516901
-bundleId: 7513801
+bundleId: 7515140
 url: https://sagf8q-choi0wonseok.shinyapps.io/Sample_Size_Calculator/
-when: 1690795156.42842
-lastSyncTime: 1690795156.42843
+when: 1690820109.58046
+lastSyncTime: 1690820109.58046
 asMultiple: FALSE
 asStatic: FALSE
