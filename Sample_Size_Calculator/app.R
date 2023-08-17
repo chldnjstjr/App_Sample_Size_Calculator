@@ -4,11 +4,11 @@ library(shinythemes)
 
 # UI 부분을 정의합니다.
 ui <- navbarPage("표본 크기 및 오차 한계 계산기",
-                 theme = shinytheme("journal"),  # 초기 테마 설정
+                 theme = shinytheme("flatly"),  # 테마를 flatly로 설정
                  tabPanel("① 표본 크기 계산",
                           sidebarLayout(
                             sidebarPanel(
-                              numericInput("population_size_sample", "모집단 크기:", value = 100, min = 1, max = 10000000000),
+                              numericInput("population_size_sample", "모집단 크기:", value = 10000, min = 1, max = 10000000000),
                               selectInput("confidence_level_sample", "신뢰수준:", choices = c("90%", "95%", "99%")),
                               numericInput("margin_of_error_sample", "오차한계(%):", value = 5, min = 1, max = 100)
                             ),
@@ -40,16 +40,17 @@ ui <- navbarPage("표본 크기 및 오차 한계 계산기",
                             p("p는 모집단 비율 (일반적으로 0.5를 사용),"),
                             p("E는 허용 오차 (오차 한계) 입니다."),
                             p("예: 모집단 크기가 10,000이고, 신뢰 수준이 99%, 오차 한계가 5%일 때 필요한 표본 크기는 다음과 같이 계산됩니다:"),
-                            p("n = (2.576^2 * 0.5 * 0.5) / 0.05^2 = 666.82"),
+                            p("n = (2.58^2 * 0.5 * 0.5) / 0.05^2 = 665.64"),
                             p("따라서 필요한 표본 크기는 667명입니다."),
                             h3("유한 모집단 보정"),
                             p("표본 크기를 계산할 때 모집단이 유한하다는 것을 고려해 보정을 할 필요가 있습니다. 모집단이 작을 경우, 계산된 표본 크기가 모집단 크기를 초과할 수 있기 때문입니다."),
                             p("보정 공식은 다음과 같습니다:"),
                             p("n_corrected = n / (1 + ((n - 1) / N))"),
+                            p("666 = 665.64 / (1 + ((665.64 - 1) / 51,439,038))"),
                             p("여기서,"),
                             p("n_corrected는 보정된 표본 크기,"),
                             p("n은 초기 계산된 표본 크기,"),
-                            p("N은 모집단 크기 입니다."),
+                            p("N은 모집단 크기로 2022년 기준 대한민국 총인구 수 51,439,038로 가정"),
                             p("이 공식을 사용하면, 모집단 크기 내에서 적절한 표본 크기를 계산할 수 있습니다.")
                           )
                  ), 
@@ -60,18 +61,14 @@ ui <- navbarPage("표본 크기 및 오차 한계 계산기",
                             p("E = z_score * sqrt(0.5 * (1 - 0.5)) / sqrt((N - 1) * n / (N - n))"),
                             p("여기서,"),
                             p("E는 계산된 오차 한계,"),
-                            p("Z는 신뢰수준에 해당하는 Z 점수 (예: 90% 신뢰수준의 Z 점수는 1.645, 95%는 1.96, 99%는 2.576),"),
+                            p("Z는 신뢰수준에 해당하는 Z 점수 (예: 90% 신뢰수준의 Z 점수는 1.65, 95%는 1.96, 99%는 2.58),"),
                             p("p는 모집단 비율 (일반적으로 0.5를 사용),"),
                             p("N과 n은 각각 모집단 크기와 표본 크기입니다."),
                             p("예: 모집단 크기가 10,000이고, 표본 크기가 1000명, 신뢰 수준이 99%일 때 오차 한계는 다음과 같이 계산됩니다:"),
-                            p("E = 2.576 * sqrt((0.5 * 0.5) / 1000) = 0.0816"),
-                            p("따라서 계산된 오차 한계는 ±8.16%입니다.")
+                            p("E = 2.58 * sqrt(0.5 * (1 - 0.5)) / sqrt((10000 - 1) * 1000 / (10000 - 1000))"),
+                            p("따라서 계산된 오차 한계는 ±3.87%입니다.")
                           )
-                 ), 
-                 tabPanel("테마 설정", 
-                          mainPanel(
-                            themeSelector()
-                          ))
+                 )
 )
 
 # 유한 모집단 보정 함수를 정의합니다.
@@ -111,7 +108,7 @@ server <- function(input, output) {
     margin_of_error <- input$margin_of_error_sample
     
     sample_size <- calculate_sample_size(population_size, confidence_level, margin_of_error)
-    HTML(paste("<div style='text-align: center;'>필요한 최소 표본 크기는 <span style='font-size:500%; color:darkblue; font-weight:bold;'>", sample_size, "</span>명입니다.</div>"))
+    HTML(paste("<div style='text-align: center;'>필요한 최소 표본 크기 <br><span style='font-size:1000%; color:darkblue; font-weight:bold;'>", sample_size, "</span></div>"))
   })
   
   output$margin_of_error_output <- renderUI({
@@ -120,7 +117,7 @@ server <- function(input, output) {
     sample_size <- input$sample_size_margin
     
     margin_of_error <- calculate_margin_of_error(population_size, confidence_level, sample_size)
-    HTML(paste("<div style='text-align: center;'>계산된 오차 한계는 <span style='font-size:500%; color:darkblue; font-weight:bold;'>±", margin_of_error, "%</span>입니다.</div>"))
+    HTML(paste("<div style='text-align: center;'>계산된 오차 한계 <br><span style='font-size:1000%; color:darkblue; font-weight:bold;'>±", margin_of_error, "%</span></div>"))
   })
 }
 
